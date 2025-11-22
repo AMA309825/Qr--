@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مول السعودية - نظام الفواتير والQR</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a5f7a;
+            --secondary-color: #57cc99;
+            --accent-color: #ffd166;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark-color);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #2c8fb5);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,192C1248,192,1344,128,1392,96L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .logo i {
+            color: var(--accent-color);
+            margin-left: 10px;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 15px;
+        }
+        
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .card-header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: bold;
+            padding: 1rem 1.5rem;
+            border-bottom: none;
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--dark-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary-color), #2c8fb5);
+            border: none;
+            border-radius: 50px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(44, 143, 181, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, var(--secondary-color), #38b2ac);
+            border: none;
+            border-radius: 50px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(87, 204, 153, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(to right, var(--accent-color), #ffb347);
+            border: none;
+            border-radius: 50px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--dark-color);
+        }
+        
+        .btn-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(255, 209, 102, 0.4);
+        }
+        
+        .scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        #scanner {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+        
+        .scanner-frame {
+            width: 70%;
+            height: 70%;
+            border: 3px solid var(--accent-color);
+            border-radius: 10px;
+            box-shadow: 0 0 0 1000px rgba(0,0,0,0.5);
+        }
+        
+        .item-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .item-row {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s ease;
+        }
+        
+        .item-row:hover {
+            background-color: rgba(0,0,0,0.03);
+        }
+        
+        .invoice-preview {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-top: 2rem;
+        }
+        
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .invoice-table {
+            width: 100%;
+            margin-bottom: 1.5rem;
+            border-collapse: collapse;
+        }
+        
+        .invoice-table th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem;
+            text-align: right;
+        }
+        
+        .invoice-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+            text-align: right;
+        }
+        
+        .total-row {
+            font-weight: bold;
+            background-color: rgba(255, 209, 102, 0.2);
+        }
+        
+        .animation-fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 209, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+        
+        .manual-add-form {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+        
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+        }
+        
+        .qr-code-container {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .qr-code {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: white;
+        }
+        
+        .product-management {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .product-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s ease;
+        }
+        
+        .product-item:hover {
+            background-color: rgba(0,0,0,0.03);
+        }
+        
+        .invoice-qr-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .invoice-qr-code {
+            max-width: 200px;
+            margin: 0 auto 1rem;
+        }
+        
+        .upload-qr-section {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .upload-preview {
+            max-width: 200px;
+            margin: 1rem auto;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 1rem auto;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        /* طباعة الفاتورة */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #invoice-preview, #invoice-preview * {
+                visibility: visible;
+            }
+            #invoice-preview {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- رأس الصفحة -->
+    <header class="header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="logo">
+                    <i class="fas fa-crown"></i>
+                    مول السعودية
+                </div>
+                <div class="text-center">
+                    <h1 class="h3 mb-0">نظام مسح QR وإنشاء الفواتير</h1>
+                    <p class="mb-0">للتسوق السريع والسهل</p>
+                </div>
+                <div class="text-end">
+                    <div id="current-date" class="small"></div>
+                    <div id="current-time" class="small"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="main-container">
+        <!-- علامات التبويب -->
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="scanner-tab" data-bs-toggle="tab" data-bs-target="#scanner-panel" type="button" role="tab">
+                    <i class="fas fa-qrcode me-1"></i> مسح QR
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="generator-tab" data-bs-toggle="tab" data-bs-target="#generator-panel" type="button" role="tab">
+                    <i class="fas fa-plus-circle me-1"></i> إنشاء QR
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products-panel" type="button" role="tab">
+                    <i class="fas fa-boxes me-1"></i> إدارة المنتجات
+                </button>
+            </li>
+        </ul>
+
+        <!-- محتوى علامات التبويب -->
+        <div class="tab-content" id="myTabContent">
+            <!-- لوحة المسح -->
+            <div class="tab-pane fade show active" id="scanner-panel" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card animation-fade-in">
+                            <div class="card-header">
+                                <i class="fas fa-qrcode me-2"></i>مسح QR للمنتجات
+                            </div>
+                            <div class="card-body">
+                                <div class="scanner-container mb-4">
+                                    <video id="scanner" autoplay playsinline></video>
+                                    <div class="scanner-overlay">
+                                        <div class="scanner-frame pulse"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-center mb-4">
+                                    <button id="start-scanner" class="btn btn-primary me-2">
+                                        <i class="fas fa-camera me-1"></i> بدء المسح
+                                    </button>
+                                    <button id="stop-scanner" class="btn btn-secondary" disabled>
+                                        <i class="fas fa-stop me-1"></i> إيقاف المسح
+                                    </button>
+                                </div>
+                                
+                                <div class="alert alert-info text-center">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    قم بتوجيه الكاميرا نحو رمز QR الخاص بالمنتج لإضافته إلى الفاتورة
+                                </div>
+                                
+                                <!-- قسم إرفاق QR من الموبايل -->
+                                <div class="upload-qr-section">
+                                    <h5><i class="fas fa-upload me-1"></i> إرفاق صورة QR من الموبايل</h5>
+                                    <div class="mb-3">
+                                        <input type="file" id="upload-qr" class="form-control" accept="image/*">
+                                    </div>
+                                    <div id="upload-preview" class="upload-preview">
+                                        <img id="uploaded-image" class="img-fluid rounded" alt="صورة QR المرفوعة">
+                                    </div>
+                                    <button id="scan-uploaded-qr" class="btn btn-warning w-100" disabled>
+                                        <i class="fas fa-search me-1"></i> مسح QR من الصورة
+                                    </button>
+                                </div>
+                                
+                                <div class="manual-add-form">
+                                    <h5 class="mb-3"><i class="fas fa-plus-circle me-1"></i> إضافة منتج يدويًا</h5>
+                                    <div class="row g-2">
+                                        <div class="col-md-5">
+                                            <input type="text" id="product-name" class="form-control" placeholder="اسم المنتج">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" id="product-price" class="form-control" placeholder="السعر">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" id="product-quantity" class="form-control" value="1" min="1">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button id="add-manually" class="btn btn-success w-100">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- قائمة المنتجات -->
+                    <div class="col-lg-6">
+                        <div class="card animation-fade-in">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-shopping-basket me-2"></i>قائمة المنتجات الممسوحة
+                                </div>
+                                <div class="badge bg-primary rounded-pill" id="items-count">0</div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="items-container" class="item-list">
+                                    <div class="empty-state">
+                                        <i class="fas fa-shopping-basket"></i>
+                                        <h5>لا توجد منتجات</h5>
+                                        <p class="mb-0">ابدأ بمسح رموز QR أو إضافة المنتجات يدويًا</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between">
+                                    <button id="clear-all" class="btn btn-outline-danger">
+                                        <i class="fas fa-trash me-1"></i> مسح الكل
+                                    </button>
+                                    <button id="generate-invoice" class="btn btn-success">
+                                        <i class="fas fa-file-invoice me-1"></i> إنشاء الفاتورة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- معاينة الفاتورة -->
+                <div id="invoice-preview" class="card animation-fade-in" style="display: none;">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-receipt me-2"></i>فاتورة الشراء
+                        </div>
+                        <div>
+                            <button id="edit-invoice" class="btn btn-warning btn-sm me-2 no-print">
+                                <i class="fas fa-edit me-1"></i> تعديل الفاتورة
+                            </button>
+                            <button id="print-invoice" class="btn btn-primary btn-sm no-print">
+                                <i class="fas fa-print me-1"></i> طباعة الفاتورة
+                            </button>
+                            <button id="save-invoice" class="btn btn-success btn-sm no-print">
+                                <i class="fas fa-save me-1"></i> حفظ الفاتورة
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="invoice-preview">
+                            <div class="invoice-header">
+                                <h2 class="mb-1">مول السعودية</h2>
+                                <p class="mb-1">لتجهيز العرائس - كل ما تحتاجه في مكان واحد</p>
+                                <p class="mb-0 text-muted" id="invoice-date"></p>
+                                <p class="mb-0 text-muted" id="invoice-number">رقم الفاتورة: <span id="invoice-num">001</span></p>
+                            </div>
+                            
+                            <table class="invoice-table">
+                                <thead>
+                                    <tr>
+                                        <th width="5%">#</th>
+                                        <th width="45%">اسم المنتج</th>
+                                        <th width="15%">السعر</th>
+                                        <th width="15%">الكمية</th>
+                                        <th width="20%">المجموع</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoice-items">
+                                    <!-- سيتم ملؤها بالمنتجات -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="total-row">
+                                        <td colspan="4" class="text-end">الإجمالي:</td>
+                                        <td id="invoice-total">0.00 جنيه</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+
+                            <!-- QR code للفاتورة -->
+                            <div class="invoice-qr-section">
+                                <h5><i class="fas fa-qrcode me-2"></i>رمز QR للفاتورة</h5>
+                                <p class="text-muted mb-3">يمكن للعميل مسح هذا الرمز للحصول على نسخة من الفاتورة</p>
+                                <div id="invoice-qr-code" class="invoice-qr-code">
+                                    <!-- سيتم إنشاء QR code هنا -->
+                                </div>
+                                <button id="download-invoice-qr" class="btn btn-primary no-print">
+                                    <i class="fas fa-download me-1"></i> تحميل QR الفاتورة
+                                </button>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="alert alert-info">
+                                        <h6><i class="fas fa-info-circle me-1"></i> شروط الدفع:</h6>
+                                        <p class="mb-0">يجب سداد الفاتورة خلال 7 أيام من تاريخ الشراء</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <div class="alert alert-light">
+                                        <h6>شكرًا لاختياركم مول السعودية</h6>
+                                        <p class="mb-0">للاستفسار: 0123456789</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- لوحة إنشاء QR -->
+            <div class="tab-pane fade" id="generator-panel" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card animation-fade-in">
+                            <div class="card-header">
+                                <i class="fas fa-plus-circle me-2"></i>إنشاء رمز QR جديد
+                            </div>
+                            <div class="card-body">
+                                <form id="qr-generator-form">
+                                    <div class="mb-3">
+                                        <label for="new-product-name" class="form-label">اسم المنتج</label>
+                                        <input type="text" class="form-control" id="new-product-name" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="new-product-price" class="form-label">سعر المنتج (جنيه)</label>
+                                        <input type="number" class="form-control" id="new-product-price" min="1" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="new-product-category" class="form-label">الفئة</label>
+                                        <select class="form-select" id="new-product-category">
+                                            <option value="أثاث">أثاث</option>
+                                            <option value="إكسسوارات">إكسسوارات</option>
+                                            <option value="أدوات منزلية">أدوات منزلية</option>
+                                            <option value="ملابس">ملابس</option>
+                                            <option value="مكياج">مكياج</option>
+                                            <option value="أخرى">أخرى</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="new-product-description" class="form-label">وصف المنتج (اختياري)</label>
+                                        <textarea class="form-control" id="new-product-description" rows="2"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-qrcode me-1"></i> إنشاء رمز QR
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card animation-fade-in">
+                            <div class="card-header">
+                                <i class="fas fa-image me-2"></i>معاينة رمز QR
+                            </div>
+                            <div class="card-body text-center">
+                                <div id="qr-preview" class="qr-code-container" style="display: none;">
+                                    <canvas id="qrcode" class="mb-3"></canvas>
+                                    <h5 id="qr-product-name" class="mb-2"></h5>
+                                    <p class="mb-1">السعر: <span id="qr-product-price" class="fw-bold"></span> جنيه</p>
+                                    <p class="mb-3">الفئة: <span id="qr-product-category"></span></p>
+                                    <button id="download-qr" class="btn btn-primary">
+                                        <i class="fas fa-download me-1"></i> تحميل رمز QR
+                                    </button>
+                                </div>
+                                <div id="qr-empty-state" class="empty-state">
+                                    <i class="fas fa-qrcode"></i>
+                                    <h5>لم يتم إنشاء رمز QR بعد</h5>
+                                    <p class="mb-0">املأ النموذج على اليسار لإنشاء رمز QR جديد</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- لوحة إدارة المنتجات -->
+            <div class="tab-pane fade" id="products-panel" role="tabpanel">
+                <div class="card animation-fade-in">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-boxes me-2"></i>إدارة المنتجات
+                        </div>
+                        <div class="badge bg-primary rounded-pill" id="products-count">0</div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="products-container" class="product-management">
+                            <div class="empty-state">
+                                <i class="fas fa-box-open"></i>
+                                <h5>لا توجد منتجات</h5>
+                                <p class="mb-0">انتقل إلى علامة تبويب "إنشاء QR" لإضافة منتجات جديدة</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- تذييل الصفحة -->
+    <footer class="footer text-center">
+        <div class="container">
+            <p class="mb-0">جميع الحقوق محفوظة &copy; 2023 مول السعودية</p>
+            <p class="mb-0">نظام مسح QR وإنشاء الفواتير - تم التطوير خصيصًا لتلبية احتياجاتكم</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // بيانات المنتجات الافتراضية
+        let productsDatabase = {
+            "001": { name: "مفرش سرير", price: 80, category: "أثاث", description: "مفرش سرير قطني فاخر" },
+            "002": { name: "مرتبة الأهرام", price: 1100, category: "أثاث", description: "مرتبة طبية مريحة" },
+            "003": { name: "وسادة حرير", price: 150, category: "أثاث", description: "وسادة حريرية ناعمة" },
+            "004": { name: "غطاء لحاف", price: 200, category: "أثاث", description: "غطاء لحاف قطني مطرز" },
+            "005": { name: "ستائر مخمل", price: 350, category: "أدوات منزلية", description: "ستائر مخملية عالية الجودة" },
+            "006": { name: "سجادة صلاة", price: 120, category: "إكسسوارات", description: "سجادة صلاة مطرزة" },
+            "007": { name: "منظم أحذية", price: 85, category: "أدوات منزلية", description: "منظم أحذية بلاستيك متين" },
+            "008": { name: "مكياج عروس", price: 450, category: "مكياج", description: "مجموعة مكياج كاملة للعروس" },
+            "009": { name: "عقد لؤلؤ", price: 280, category: "إكسسوارات", description: "عقد لؤلؤ طبيعي أنيق" },
+            "010": { name: "حقيبة يد", price: 320, category: "إكسسوارات", description: "حقيبة يد جلدية فاخرة" }
+        };
+
+        // عناصر DOM
+        const startScannerBtn = document.getElementById('start-scanner');
+        const stopScannerBtn = document.getElementById('stop-scanner');
+        const scanner = document.getElementById('scanner');
+        const itemsContainer = document.getElementById('items-container');
+        const itemsCount = document.getElementById('items-count');
+        const clearAllBtn = document.getElementById('clear-all');
+        const generateInvoiceBtn = document.getElementById('generate-invoice');
+        const invoicePreview = document.getElementById('invoice-preview');
+        const invoiceItems = document.getElementById('invoice-items');
+        const invoiceTotal = document.getElementById('invoice-total');
+        const invoiceDate = document.getElementById('invoice-date');
+        const invoiceNum = document.getElementById('invoice-num');
+        const editInvoiceBtn = document.getElementById('edit-invoice');
+        const printInvoiceBtn = document.getElementById('print-invoice');
+        const saveInvoiceBtn = document.getElementById('save-invoice');
+        const addManuallyBtn = document.getElementById('add-manually');
+        const productNameInput = document.getElementById('product-name');
+        const productPriceInput = document.getElementById('product-price');
+        const productQuantityInput = document.getElementById('product-quantity');
+        const currentDateElement = document.getElementById('current-date');
+        const currentTimeElement = document.getElementById('current-time');
+        const qrGeneratorForm = document.getElementById('qr-generator-form');
+        const qrPreview = document.getElementById('qr-preview');
+        const qrEmptyState = document.getElementById('qr-empty-state');
+        const qrProductName = document.getElementById('qr-product-name');
+        const qrProductPrice = document.getElementById('qr-product-price');
+        const qrProductCategory = document.getElementById('qr-product-category');
+        const downloadQrBtn = document.getElementById('download-qr');
+        const productsContainer = document.getElementById('products-container');
+        const productsCount = document.getElementById('products-count');
+        const invoiceQrCode = document.getElementById('invoice-qr-code');
+        const downloadInvoiceQrBtn = document.getElementById('download-invoice-qr');
+        const uploadQrInput = document.getElementById('upload-qr');
+        const uploadedImage = document.getElementById('uploaded-image');
+        const uploadPreview = document.getElementById('upload-preview');
+        const scanUploadedQrBtn = document.getElementById('scan-uploaded-qr');
+
+        // متغيرات التطبيق
+        let scannedItems = [];
+        let stream = null;
+        let canvasElement = null;
+        let canvasContext = null;
+        let nextProductId = 11;
+        let invoiceCounter = 1;
+        let currentUploadedImage = null;
+
+        // تحديث التاريخ والوقت
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateElement.textContent = now.toLocaleDateString('ar-EG', options);
+            currentTimeElement.textContent = now.toLocaleTimeString('ar-EG');
+        }
+        
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // بدء المسح
+        startScannerBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" } 
+                });
+                scanner.srcObject = stream;
+                
+                // إعداد canvas لتحليل QR
+                canvasElement = document.createElement('canvas');
+                canvasContext = canvasElement.getContext('2d');
+                
+                // تمكين/تعطيل الأزرار
+                startScannerBtn.disabled = true;
+                stopScannerBtn.disabled = false;
+                
+                // بدء مسح QR
+                scanQRCode();
+            } catch (err) {
+                console.error("خطأ في الوصول إلى الكاميرا:", err);
+                alert("تعذر الوصول إلى الكاميرا. يرجى التحقق من الأذونات.");
+            }
+        });
+
+        // إيقاف المسح
+        stopScannerBtn.addEventListener('click', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                scanner.srcObject = null;
+                
+                // تمكين/تعطيل الأزرار
+                startScannerBtn.disabled = false;
+                stopScannerBtn.disabled = true;
+            }
+        });
+
+        // مسح QR
+        function scanQRCode() {
+            if (!scanner.videoWidth || !scanner.videoHeight) {
+                requestAnimationFrame(scanQRCode);
+                return;
+            }
+            
+            canvasElement.width = scanner.videoWidth;
+            canvasElement.height = scanner.videoHeight;
+            canvasContext.drawImage(scanner, 0, 0, canvasElement.width, canvasElement.height);
+            
+            const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            
+            if (code) {
+                // وجدنا رمز QR
+                const productCode = code.data;
+                
+                if (productsDatabase[productCode]) {
+                    addProductToCart(productsDatabase[productCode]);
+                } else {
+                    alert("رمز QR غير معروف. المنتج غير موجود في قاعدة البيانات.");
+                }
+            }
+            
+            requestAnimationFrame(scanQRCode);
+        }
+
+        // إضافة منتج إلى السلة
+        function addProductToCart(product, quantity = 1) {
+            // التحقق مما إذا كان المنتج موجودًا بالفعل
+            const existingItemIndex = scannedItems.findIndex(item => item.name === product.name);
+            
+            if (existingItemIndex !== -1) {
+                // زيادة الكمية إذا كان المنتج موجودًا
+                scannedItems[existingItemIndex].quantity += quantity;
+            } else {
+                // إضافة منتج جديد
+                scannedItems.push({
+                    id: Date.now(),
+                    name: product.name,
+                    price: product.price,
+                    quantity: quantity
+                });
+            }
+            
+            updateItemsList();
+            
+            // تأثير إضافة المنتج
+            const itemList = document.getElementById('items-container');
+            itemList.classList.add('animation-fade-in');
+            setTimeout(() => {
+                itemList.classList.remove('animation-fade-in');
+            }, 500);
+        }
+
+        // تحديث قائمة المنتجات
+        function updateItemsList() {
+            itemsContainer.innerHTML = '';
+            
+            if (scannedItems.length === 0) {
+                itemsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-shopping-basket"></i>
+                        <h5>لا توجد منتجات</h5>
+                        <p class="mb-0">ابدأ بمسح رموز QR أو إضافة المنتجات يدويًا</p>
+                    </div>
+                `;
+            } else {
+                scannedItems.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'item-row d-flex justify-content-between align-items-center';
+                    itemElement.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-2">${index + 1}</span>
+                            <div>
+                                <div class="fw-bold">${item.name}</div>
+                                <div class="small text-muted">${item.price} جنيه × ${item.quantity}</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="fw-bold me-3">${item.price * item.quantity} جنيه</span>
+                            <button class="btn btn-sm btn-outline-danger delete-item" data-id="${item.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    itemsContainer.appendChild(itemElement);
+                });
+                
+                // إضافة مستمعات الأحداث لأزرار الحذف
+                document.querySelectorAll('.delete-item').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const itemId = parseInt(e.target.closest('.delete-item').dataset.id);
+                        removeItemFromCart(itemId);
+                    });
+                });
+            }
+            
+            itemsCount.textContent = scannedItems.length;
+        }
+
+        // إزالة منتج من السلة
+        function removeItemFromCart(itemId) {
+            scannedItems = scannedItems.filter(item => item.id !== itemId);
+            updateItemsList();
+        }
+
+        // مسح جميع المنتجات
+        clearAllBtn.addEventListener('click', () => {
+            if (scannedItems.length > 0) {
+                if (confirm("هل أنت متأكد من مسح جميع المنتجات؟")) {
+                    scannedItems = [];
+                    updateItemsList();
+                }
+            }
+        });
+
+        // إنشاء الفاتورة
+        generateInvoiceBtn.addEventListener('click', () => {
+            if (scannedItems.length === 0) {
+                alert("لا توجد منتجات لإضافة الفاتورة. يرجى إضافة منتجات أولاً.");
+                return;
+            }
+            
+            // تحديث تاريخ الفاتورة
+            const now = new Date();
+            invoiceDate.textContent = now.toLocaleDateString('ar-EG', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            // تحديث رقم الفاتورة
+            const invoiceNumber = invoiceCounter.toString().padStart(3, '0');
+            invoiceNum.textContent = invoiceNumber;
+            
+            // ملء جدول الفاتورة
+            invoiceItems.innerHTML = '';
+            let total = 0;
+            
+            scannedItems.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${item.name}</td>
+                    <td>${item.price} جنيه</td>
+                    <td>${item.quantity}</td>
+                    <td>${itemTotal} جنيه</td>
+                `;
+                invoiceItems.appendChild(row);
+            });
+            
+            invoiceTotal.textContent = `${total} جنيه`;
+            
+            // إنشاء QR code للفاتورة
+            createInvoiceQRCode(invoiceNumber, total, now);
+            
+            // عرض معاينة الفاتورة
+            invoicePreview.style.display = 'block';
+            invoicePreview.scrollIntoView({ behavior: 'smooth' });
+            
+            // زيادة عداد الفواتير
+            invoiceCounter++;
+        });
+
+        // إنشاء QR code للفاتورة
+        function createInvoiceQRCode(invoiceNumber, total, date) {
+            // مسح أي QR code سابق
+            invoiceQrCode.innerHTML = '';
+            
+            // إنشاء بيانات الفاتورة لـ QR code
+            const invoiceData = {
+                invoiceNumber: invoiceNumber,
+                date: date.toLocaleDateString('ar-EG'),
+                total: total,
+                items: scannedItems.map(item => ({
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                }))
+            };
+            
+            const qrData = JSON.stringify(invoiceData);
+            
+            // إنشاء QR code جديد
+            QRCode.toCanvas(invoiceQrCode, qrData, {
+                width: 180,
+                margin: 1,
+                color: {
+                    dark: '#1a5f7a',
+                    light: '#ffffff'
+                }
+            }, function (error) {
+                if (error) {
+                    console.error(error);
+                    alert("حدث خطأ أثناء إنشاء QR code للفاتورة");
+                    return;
+                }
+                
+                console.log("QR code للفاتورة تم إنشاؤه بنجاح");
+            });
+        }
+
+        // تعديل الفاتورة
+        editInvoiceBtn.addEventListener('click', () => {
+            invoicePreview.style.display = 'none';
+        });
+
+        // طباعة الفاتورة
+        printInvoiceBtn.addEventListener('click', () => {
+            window.print();
+        });
+
+        // حفظ الفاتورة
+        saveInvoiceBtn.addEventListener('click', () => {
+            // في تطبيق حقيقي، هنا سيتم إرسال الفاتورة إلى الخادم
+            // لكن في هذا المثال، سنقوم فقط بتنزيلها كملف PDF افتراضي
+            
+            alert("تم حفظ الفاتورة بنجاح! (في التطبيق الحقيقي، سيتم حفظها في قاعدة البيانات)");
+        });
+
+        // تحميل QR code الفاتورة
+        downloadInvoiceQrBtn.addEventListener('click', () => {
+            const canvas = invoiceQrCode.querySelector('canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = `فاتورة_${invoiceNum.textContent}_QR.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } else {
+                alert("لم يتم إنشاء QR code للفاتورة بعد");
+            }
+        });
+
+        // إضافة منتج يدويًا
+        addManuallyBtn.addEventListener('click', () => {
+            const name = productNameInput.value.trim();
+            const price = parseFloat(productPriceInput.value);
+            const quantity = parseInt(productQuantityInput.value) || 1;
+            
+            if (!name || isNaN(price) || price <= 0) {
+                alert("يرجى إدخال اسم المنتج وسعر صحيحين");
+                return;
+            }
+            
+            addProductToCart({ name, price }, quantity);
+            
+            // إعادة تعيين الحقول
+            productNameInput.value = '';
+            productPriceInput.value = '';
+            productQuantityInput.value = '1';
+        });
+
+        // السماح بإدخال المنتج يدويًا باستخدام Enter
+        productNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addManuallyBtn.click();
+            }
+        });
+        
+        productPriceInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addManuallyBtn.click();
+            }
+        });
+
+        // إرفاق صورة QR من الموبايل
+        uploadQrInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    uploadedImage.src = event.target.result;
+                    uploadPreview.style.display = 'block';
+                    currentUploadedImage = event.target.result;
+                    scanUploadedQrBtn.disabled = false;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // مسح QR من الصورة المرفوعة
+        scanUploadedQrBtn.addEventListener('click', () => {
+            if (!currentUploadedImage) {
+                alert("يرجى رفع صورة QR أولاً");
+                return;
+            }
+            
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+                
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (code) {
+                    const productCode = code.data;
+                    
+                    if (productsDatabase[productCode]) {
+                        addProductToCart(productsDatabase[productCode]);
+                        alert(`تم إضافة المنتج: ${productsDatabase[productCode].name}`);
+                    } else {
+                        alert("رمز QR غير معروف. المنتج غير موجود في قاعدة البيانات.");
+                    }
+                } else {
+                    alert("لم يتم العثور على رمز QR في الصورة. يرجى التأكد من جودة الصورة.");
+                }
+            };
+            
+            img.src = currentUploadedImage;
+        });
+
+        // إنشاء رمز QR جديد
+        qrGeneratorForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('new-product-name').value.trim();
+            const price = parseFloat(document.getElementById('new-product-price').value);
+            const category = document.getElementById('new-product-category').value;
+            const description = document.getElementById('new-product-description').value.trim();
+            
+            if (!name || isNaN(price) || price <= 0) {
+                alert("يرجى إدخال اسم المنتج وسعر صحيحين");
+                return;
+            }
+            
+            // إنشاء معرف فريد للمنتج
+            const productId = nextProductId.toString().padStart(3, '0');
+            nextProductId++;
+            
+            // إضافة المنتج إلى قاعدة البيانات
+            productsDatabase[productId] = {
+                name,
+                price,
+                category,
+                description
+            };
+            
+            // إنشاء رمز QR
+            const qrData = JSON.stringify({
+                id: productId,
+                name,
+                price,
+                category
+            });
+            
+            // مسح أي رمز QR سابق
+            document.getElementById('qrcode').innerHTML = '';
+            
+            // إنشاء رمز QR جديد
+            QRCode.toCanvas(document.getElementById('qrcode'), qrData, {
+                width: 200,
+                margin: 2,
+                color: {
+                    dark: '#1a5f7a',
+                    light: '#ffffff'
+                }
+            }, function (error) {
+                if (error) {
+                    console.error(error);
+                    alert("حدث خطأ أثناء إنشاء رمز QR");
+                    return;
+                }
+                
+                // عرض معاينة رمز QR
+                qrProductName.textContent = name;
+                qrProductPrice.textContent = price;
+                qrProductCategory.textContent = category;
+                
+                qrEmptyState.style.display = 'none';
+                qrPreview.style.display = 'block';
+                
+                // تحديث قائمة المنتجات
+                updateProductsList();
+            });
+            
+            // إعادة تعيين النموذج
+            qrGeneratorForm.reset();
+        });
+
+        // تحميل رمز QR
+        downloadQrBtn.addEventListener('click', () => {
+            const canvas = document.getElementById('qrcode');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = `qrcode_${qrProductName.textContent}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+        });
+
+        // تحديث قائمة المنتجات
+        function updateProductsList() {
+            productsContainer.innerHTML = '';
+            
+            const productKeys = Object.keys(productsDatabase);
+            
+            if (productKeys.length === 0) {
+                productsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h5>لا توجد منتجات</h5>
+                        <p class="mb-0">انتقل إلى علامة تبويب "إنشاء QR" لإضافة منتجات جديدة</p>
+                    </div>
+                `;
+            } else {
+                productKeys.forEach(key => {
+                    const product = productsDatabase[key];
+                    const productElement = document.createElement('div');
+                    productElement.className = 'product-item d-flex justify-content-between align-items-center';
+                    productElement.innerHTML = `
+                        <div>
+                            <div class="fw-bold">${product.name}</div>
+                            <div class="small text-muted">
+                                السعر: ${product.price} جنيه | 
+                                الفئة: ${product.category} |
+                                الرمز: ${key}
+                            </div>
+                            ${product.description ? `<div class="small mt-1">${product.description}</div>` : ''}
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary view-product" data-id="${key}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-product" data-id="${key}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    productsContainer.appendChild(productElement);
+                });
+                
+                // إضافة مستمعات الأحداث لأزرار المنتجات
+                document.querySelectorAll('.view-product').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const productId = e.target.closest('.view-product').dataset.id;
+                        viewProduct(productId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-product').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const productId = e.target.closest('.delete-product').dataset.id;
+                        deleteProduct(productId);
+                    });
+                });
+            }
+            
+            productsCount.textContent = productKeys.length;
+        }
+
+        // عرض منتج
+        function viewProduct(productId) {
+            const product = productsDatabase[productId];
+            if (product) {
+                // إنشاء رمز QR للمنتج
+                const qrData = JSON.stringify({
+                    id: productId,
+                    name: product.name,
+                    price: product.price,
+                    category: product.category
+                });
+                
+                // مسح أي رمز QR سابق
+                document.getElementById('qrcode').innerHTML = '';
+                
+                // إنشاء رمز QR جديد
+                QRCode.toCanvas(document.getElementById('qrcode'), qrData, {
+                    width: 200,
+                    margin: 2,
+                    color: {
+                        dark: '#1a5f7a',
+                        light: '#ffffff'
+                    }
+                }, function (error) {
+                    if (error) {
+                        console.error(error);
+                        alert("حدث خطأ أثناء إنشاء رمز QR");
+                        return;
+                    }
+                    
+                    // عرض معاينة رمز QR
+                    qrProductName.textContent = product.name;
+                    qrProductPrice.textContent = product.price;
+                    qrProductCategory.textContent = product.category;
+                    
+                    qrEmptyState.style.display = 'none';
+                    qrPreview.style.display = 'block';
+                    
+                    // الانتقال إلى علامة تبويب إنشاء QR
+                    document.getElementById('generator-tab').click();
+                });
+            }
+        }
+
+        // حذف منتج
+        function deleteProduct(productId) {
+            if (confirm(`هل أنت متأكد من حذف المنتج "${productsDatabase[productId].name}"؟`)) {
+                delete productsDatabase[productId];
+                updateProductsList();
+            }
+        }
+
+        // تهيئة التطبيق
+        updateItemsList();
+        updateProductsList();
+    </script>
+</body>
+</html>
