@@ -332,6 +332,28 @@
             display: none;
         }
         
+        .customer-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .invoice-customer-info {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .edit-product-form {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             .main-container {
                 margin: 1rem auto;
@@ -456,6 +478,19 @@
                                     </button>
                                 </div>
                                 
+                                <!-- قسم معلومات العميل -->
+                                <div class="customer-info">
+                                    <h5><i class="fas fa-user me-1"></i> معلومات العميل</h5>
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <input type="text" id="customer-name" class="form-control" placeholder="اسم العميل">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" id="customer-phone" class="form-control" placeholder="رقم الهاتف">
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div class="manual-add-form">
                                     <h5 class="mb-3"><i class="fas fa-plus-circle me-1"></i> إضافة منتج يدويًا</h5>
                                     <div class="row g-2">
@@ -527,6 +562,9 @@
                             <button id="save-invoice" class="btn btn-success btn-sm no-print">
                                 <i class="fas fa-save me-1"></i> حفظ الفاتورة
                             </button>
+                            <button id="send-invoice" class="btn btn-info btn-sm no-print">
+                                <i class="fas fa-share me-1"></i> إرسال الفاتورة
+                            </button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -536,6 +574,19 @@
                                 <p class="mb-1">لتجهيز العرائس - كل ما تحتاجه في مكان واحد</p>
                                 <p class="mb-0 text-muted" id="invoice-date"></p>
                                 <p class="mb-0 text-muted" id="invoice-number">رقم الفاتورة: <span id="invoice-num">001</span></p>
+                            </div>
+                            
+                            <!-- معلومات العميل في الفاتورة -->
+                            <div id="invoice-customer-info" class="invoice-customer-info" style="display: none;">
+                                <h5>معلومات العميل</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>الاسم:</strong> <span id="invoice-customer-name"></span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>الهاتف:</strong> <span id="invoice-customer-phone"></span></p>
+                                    </div>
+                                </div>
                             </div>
                             
                             <table class="invoice-table">
@@ -665,12 +716,80 @@
                         </div>
                         <div class="badge bg-primary rounded-pill" id="products-count">0</div>
                     </div>
-                    <div class="card-body p-0">
-                        <div id="products-container" class="product-management">
-                            <div class="empty-state">
-                                <i class="fas fa-box-open"></i>
-                                <h5>لا توجد منتجات</h5>
-                                <p class="mb-0">انتقل إلى علامة تبويب "إنشاء QR" لإضافة منتجات جديدة</p>
+                    <div class="card-body">
+                        <!-- نموذج إضافة منتج جديد -->
+                        <div class="manual-add-form">
+                            <h5 class="mb-3"><i class="fas fa-plus-circle me-1"></i> إضافة منتج جديد</h5>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <input type="text" id="new-product-id" class="form-control" placeholder="كود المنتج">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" id="new-product-name-management" class="form-control" placeholder="اسم المنتج">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" id="new-product-price-management" class="form-control" placeholder="السعر">
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="new-product-category-management">
+                                        <option value="أثاث">أثاث</option>
+                                        <option value="إكسسوارات">إكسسوارات</option>
+                                        <option value="أدوات منزلية">أدوات منزلية</option>
+                                        <option value="ملابس">ملابس</option>
+                                        <option value="مكياج">مكياج</option>
+                                        <option value="أخرى">أخرى</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button id="add-product-management" class="btn btn-success w-100">
+                                        <i class="fas fa-plus"></i> إضافة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- نموذج تعديل المنتج -->
+                        <div id="edit-product-form" class="edit-product-form">
+                            <h5 class="mb-3"><i class="fas fa-edit me-1"></i> تعديل المنتج</h5>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <input type="text" id="edit-product-id" class="form-control" placeholder="كود المنتج" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" id="edit-product-name" class="form-control" placeholder="اسم المنتج">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" id="edit-product-price" class="form-control" placeholder="السعر">
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="edit-product-category">
+                                        <option value="أثاث">أثاث</option>
+                                        <option value="إكسسوارات">إكسسوارات</option>
+                                        <option value="أدوات منزلية">أدوات منزلية</option>
+                                        <option value="ملابس">ملابس</option>
+                                        <option value="مكياج">مكياج</option>
+                                        <option value="أخرى">أخرى</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button id="update-product" class="btn btn-primary w-100">
+                                        <i class="fas fa-save"></i> تحديث
+                                    </button>
+                                    <button id="cancel-edit" class="btn btn-secondary w-100 mt-1">
+                                        <i class="fas fa-times"></i> إلغاء
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- قائمة المنتجات -->
+                        <div class="mt-3">
+                            <div id="products-container" class="product-management">
+                                <div class="empty-state">
+                                    <i class="fas fa-box-open"></i>
+                                    <h5>لا توجد منتجات</h5>
+                                    <p class="mb-0">استخدم النموذج أعلاه لإضافة منتجات جديدة</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -689,7 +808,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // بيانات المنتجات الافتراضية
+        // بيانات المنتجات الموسعة
         let productsDatabase = {
             "001": { name: "مفرش سرير", price: 80, category: "أثاث", description: "مفرش سرير قطني فاخر" },
             "002": { name: "مرتبة الأهرام", price: 1100, category: "أثاث", description: "مرتبة طبية مريحة" },
@@ -700,575 +819,566 @@
             "007": { name: "منظم أحذية", price: 85, category: "أدوات منزلية", description: "منظم أحذية بلاستيك متين" },
             "008": { name: "مكياج عروس", price: 450, category: "مكياج", description: "مجموعة مكياج كاملة للعروس" },
             "009": { name: "عقد لؤلؤ", price: 280, category: "إكسسوارات", description: "عقد لؤلؤ طبيعي أنيق" },
-            "010": { name: "حقيبة يد", price: 320, category: "إكسسوارات", description: "حقيبة يد جلدية فاخرة" }
+            "010": { name: "حقيبة يد", price: 320, category: "إكسسوارات", description: "حقيبة يد جلدية فاخرة" },
+            "011": { name: "طقم حمام", price: 180, category: "أدوات منزلية", description: "طقم حمام قطني" },
+            "012": { name: "مشط شعر", price: 50, category: "إكسسوارات", description: "مشط شعر خشبي" },
+            "013": { name: "مرآة كبيرة", price: 220, category: "أدوات منزلية", description: "مرآة كبيرة للحمام" },
+            "014": { name: "طقم مائدة", price: 400, category: "أدوات منزلية", description: "طقم مائدة سيراميك" },
+            "015": { name: "شمعدان", price: 90, category: "إكسسوارات", description: "شمعدان زجاجي" },
+            "016": { name: "ساعة حائط", price: 300, category: "أدوات منزلية", description: "ساعة حائط كلاسيكية" },
+            "017": { name: "مصباح طاولة", price: 150, category: "أدوات منزلية", description: "مصباح طاولة LED" },
+            "018": { name: "سلة مهملات", price: 70, category: "أدوات منزلية", description: "سلة مهملات ستانلس ستيل" },
+            "019": { name: "مفرش طاولة", price: 120, category: "أدوات منزلية", description: "مفرش طاولة قطني" },
+            "020": { name: "وسادة ديكور", price: 80, category: "أثاث", description: "وسادة ديكور مطرزة" }
         };
 
-        // عناصر DOM
-        const startScannerBtn = document.getElementById('start-scanner');
-        const stopScannerBtn = document.getElementById('stop-scanner');
-        const scanner = document.getElementById('scanner');
-        const itemsContainer = document.getElementById('items-container');
-        const itemsCount = document.getElementById('items-count');
-        const clearAllBtn = document.getElementById('clear-all');
-        const generateInvoiceBtn = document.getElementById('generate-invoice');
-        const invoicePreview = document.getElementById('invoice-preview');
-        const invoiceItems = document.getElementById('invoice-items');
-        const invoiceTotal = document.getElementById('invoice-total');
-        const invoiceDate = document.getElementById('invoice-date');
-        const invoiceNum = document.getElementById('invoice-num');
-        const editInvoiceBtn = document.getElementById('edit-invoice');
-        const printInvoiceBtn = document.getElementById('print-invoice');
-        const saveInvoiceBtn = document.getElementById('save-invoice');
-        const addManuallyBtn = document.getElementById('add-manually');
-        const productNameInput = document.getElementById('product-name');
-        const productPriceInput = document.getElementById('product-price');
-        const productQuantityInput = document.getElementById('product-quantity');
-        const currentDateElement = document.getElementById('current-date');
-        const currentTimeElement = document.getElementById('current-time');
-        const qrGeneratorForm = document.getElementById('qr-generator-form');
-        const qrPreview = document.getElementById('qr-preview');
-        const qrEmptyState = document.getElementById('qr-empty-state');
-        const qrProductName = document.getElementById('qr-product-name');
-        const qrProductPrice = document.getElementById('qr-product-price');
-        const qrProductCategory = document.getElementById('qr-product-category');
-        const downloadQrBtn = document.getElementById('download-qr');
-        const productsContainer = document.getElementById('products-container');
-        const productsCount = document.getElementById('products-count');
-        const invoiceQrCode = document.getElementById('invoice-qr-code');
-        const downloadInvoiceQrBtn = document.getElementById('download-invoice-qr');
-        const uploadQrInput = document.getElementById('upload-qr');
-        const uploadedImage = document.getElementById('uploaded-image');
-        const uploadPreview = document.getElementById('upload-preview');
-        const scanUploadedQrBtn = document.getElementById('scan-uploaded-qr');
+        // تهيئة التطبيق عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // عناصر DOM
+            const startScannerBtn = document.getElementById('start-scanner');
+            const stopScannerBtn = document.getElementById('stop-scanner');
+            const scanner = document.getElementById('scanner');
+            const itemsContainer = document.getElementById('items-container');
+            const itemsCount = document.getElementById('items-count');
+            const clearAllBtn = document.getElementById('clear-all');
+            const generateInvoiceBtn = document.getElementById('generate-invoice');
+            const invoicePreview = document.getElementById('invoice-preview');
+            const invoiceItems = document.getElementById('invoice-items');
+            const invoiceTotal = document.getElementById('invoice-total');
+            const invoiceDate = document.getElementById('invoice-date');
+            const invoiceNum = document.getElementById('invoice-num');
+            const editInvoiceBtn = document.getElementById('edit-invoice');
+            const printInvoiceBtn = document.getElementById('print-invoice');
+            const saveInvoiceBtn = document.getElementById('save-invoice');
+            const sendInvoiceBtn = document.getElementById('send-invoice');
+            const addManuallyBtn = document.getElementById('add-manually');
+            const productNameInput = document.getElementById('product-name');
+            const productPriceInput = document.getElementById('product-price');
+            const productQuantityInput = document.getElementById('product-quantity');
+            const currentDateElement = document.getElementById('current-date');
+            const currentTimeElement = document.getElementById('current-time');
+            const qrGeneratorForm = document.getElementById('qr-generator-form');
+            const qrPreview = document.getElementById('qr-preview');
+            const qrEmptyState = document.getElementById('qr-empty-state');
+            const qrProductName = document.getElementById('qr-product-name');
+            const qrProductPrice = document.getElementById('qr-product-price');
+            const qrProductCategory = document.getElementById('qr-product-category');
+            const downloadQrBtn = document.getElementById('download-qr');
+            const productsContainer = document.getElementById('products-container');
+            const productsCount = document.getElementById('products-count');
+            const invoiceQrCode = document.getElementById('invoice-qr-code');
+            const downloadInvoiceQrBtn = document.getElementById('download-invoice-qr');
+            const uploadQrInput = document.getElementById('upload-qr');
+            const uploadedImage = document.getElementById('uploaded-image');
+            const uploadPreview = document.getElementById('upload-preview');
+            const scanUploadedQrBtn = document.getElementById('scan-uploaded-qr');
+            const customerNameInput = document.getElementById('customer-name');
+            const customerPhoneInput = document.getElementById('customer-phone');
+            const invoiceCustomerInfo = document.getElementById('invoice-customer-info');
+            const invoiceCustomerName = document.getElementById('invoice-customer-name');
+            const invoiceCustomerPhone = document.getElementById('invoice-customer-phone');
+            const newProductIdInput = document.getElementById('new-product-id');
+            const newProductNameManagementInput = document.getElementById('new-product-name-management');
+            const newProductPriceManagementInput = document.getElementById('new-product-price-management');
+            const newProductCategoryManagementInput = document.getElementById('new-product-category-management');
+            const addProductManagementBtn = document.getElementById('add-product-management');
+            const editProductForm = document.getElementById('edit-product-form');
+            const editProductIdInput = document.getElementById('edit-product-id');
+            const editProductNameInput = document.getElementById('edit-product-name');
+            const editProductPriceInput = document.getElementById('edit-product-price');
+            const editProductCategoryInput = document.getElementById('edit-product-category');
+            const updateProductBtn = document.getElementById('update-product');
+            const cancelEditBtn = document.getElementById('cancel-edit');
 
-        // متغيرات التطبيق
-        let scannedItems = [];
-        let stream = null;
-        let canvasElement = null;
-        let canvasContext = null;
-        let nextProductId = 11;
-        let invoiceCounter = 1;
-        let currentUploadedImage = null;
+            // متغيرات التطبيق
+            let scannedItems = [];
+            let stream = null;
+            let canvasElement = null;
+            let canvasContext = null;
+            let nextProductId = 21;
+            let invoiceCounter = 1;
+            let currentUploadedImage = null;
+            let currentlyEditingProductId = null;
 
-        // تحديث التاريخ والوقت
-        function updateDateTime() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            currentDateElement.textContent = now.toLocaleDateString('ar-EG', options);
-            currentTimeElement.textContent = now.toLocaleTimeString('ar-EG');
-        }
-        
-        setInterval(updateDateTime, 1000);
-        updateDateTime();
-
-        // بدء المسح
-        startScannerBtn.addEventListener('click', async () => {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment" } 
-                });
-                scanner.srcObject = stream;
-                
-                // إعداد canvas لتحليل QR
-                canvasElement = document.createElement('canvas');
-                canvasContext = canvasElement.getContext('2d');
-                
-                // تمكين/تعطيل الأزرار
-                startScannerBtn.disabled = true;
-                stopScannerBtn.disabled = false;
-                
-                // بدء مسح QR
-                scanQRCode();
-            } catch (err) {
-                console.error("خطأ في الوصول إلى الكاميرا:", err);
-                alert("تعذر الوصول إلى الكاميرا. يرجى التحقق من الأذونات.");
-            }
-        });
-
-        // إيقاف المسح
-        stopScannerBtn.addEventListener('click', () => {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                scanner.srcObject = null;
-                
-                // تمكين/تعطيل الأزرار
-                startScannerBtn.disabled = false;
-                stopScannerBtn.disabled = true;
-            }
-        });
-
-        // مسح QR
-        function scanQRCode() {
-            if (!scanner.videoWidth || !scanner.videoHeight) {
-                requestAnimationFrame(scanQRCode);
-                return;
+            // تحديث التاريخ والوقت
+            function updateDateTime() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                currentDateElement.textContent = now.toLocaleDateString('ar-EG', options);
+                currentTimeElement.textContent = now.toLocaleTimeString('ar-EG');
             }
             
-            canvasElement.width = scanner.videoWidth;
-            canvasElement.height = scanner.videoHeight;
-            canvasContext.drawImage(scanner, 0, 0, canvasElement.width, canvasElement.height);
-            
-            const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
-            
-            if (code) {
-                // وجدنا رمز QR
-                const productCode = code.data;
-                
-                if (productsDatabase[productCode]) {
-                    addProductToCart(productsDatabase[productCode]);
-                } else {
-                    alert("رمز QR غير معروف. المنتج غير موجود في قاعدة البيانات.");
-                }
-            }
-            
-            requestAnimationFrame(scanQRCode);
-        }
+            setInterval(updateDateTime, 1000);
+            updateDateTime();
 
-        // إضافة منتج إلى السلة
-        function addProductToCart(product, quantity = 1) {
-            // التحقق مما إذا كان المنتج موجودًا بالفعل
-            const existingItemIndex = scannedItems.findIndex(item => item.name === product.name);
-            
-            if (existingItemIndex !== -1) {
-                // زيادة الكمية إذا كان المنتج موجودًا
-                scannedItems[existingItemIndex].quantity += quantity;
-            } else {
-                // إضافة منتج جديد
-                scannedItems.push({
-                    id: Date.now(),
-                    name: product.name,
-                    price: product.price,
-                    quantity: quantity
-                });
-            }
-            
-            updateItemsList();
-            
-            // تأثير إضافة المنتج
-            const itemList = document.getElementById('items-container');
-            itemList.classList.add('animation-fade-in');
-            setTimeout(() => {
-                itemList.classList.remove('animation-fade-in');
-            }, 500);
-        }
-
-        // تحديث قائمة المنتجات
-        function updateItemsList() {
-            itemsContainer.innerHTML = '';
-            
-            if (scannedItems.length === 0) {
-                itemsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-shopping-basket"></i>
-                        <h5>لا توجد منتجات</h5>
-                        <p class="mb-0">ابدأ بمسح رموز QR أو إضافة المنتجات يدويًا</p>
-                    </div>
-                `;
-            } else {
-                scannedItems.forEach((item, index) => {
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'item-row d-flex justify-content-between align-items-center';
-                    itemElement.innerHTML = `
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-primary rounded-pill me-2">${index + 1}</span>
-                            <div>
-                                <div class="fw-bold">${item.name}</div>
-                                <div class="small text-muted">${item.price} جنيه × ${item.quantity}</div>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <span class="fw-bold me-3">${item.price * item.quantity} جنيه</span>
-                            <button class="btn btn-sm btn-outline-danger delete-item" data-id="${item.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    itemsContainer.appendChild(itemElement);
-                });
-                
-                // إضافة مستمعات الأحداث لأزرار الحذف
-                document.querySelectorAll('.delete-item').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const itemId = parseInt(e.target.closest('.delete-item').dataset.id);
-                        removeItemFromCart(itemId);
+            // بدء المسح
+            startScannerBtn.addEventListener('click', async () => {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: "environment" } 
                     });
-                });
-            }
-            
-            itemsCount.textContent = scannedItems.length;
-        }
-
-        // إزالة منتج من السلة
-        function removeItemFromCart(itemId) {
-            scannedItems = scannedItems.filter(item => item.id !== itemId);
-            updateItemsList();
-        }
-
-        // مسح جميع المنتجات
-        clearAllBtn.addEventListener('click', () => {
-            if (scannedItems.length > 0) {
-                if (confirm("هل أنت متأكد من مسح جميع المنتجات؟")) {
-                    scannedItems = [];
-                    updateItemsList();
+                    scanner.srcObject = stream;
+                    
+                    // إعداد canvas لتحليل QR
+                    canvasElement = document.createElement('canvas');
+                    canvasContext = canvasElement.getContext('2d');
+                    
+                    // تمكين/تعطيل الأزرار
+                    startScannerBtn.disabled = true;
+                    stopScannerBtn.disabled = false;
+                    
+                    // بدء مسح QR
+                    scanQRCode();
+                } catch (err) {
+                    console.error("خطأ في الوصول إلى الكاميرا:", err);
+                    alert("تعذر الوصول إلى الكاميرا. يرجى التحقق من الأذونات.");
                 }
-            }
-        });
-
-        // إنشاء الفاتورة
-        generateInvoiceBtn.addEventListener('click', () => {
-            if (scannedItems.length === 0) {
-                alert("لا توجد منتجات لإضافة الفاتورة. يرجى إضافة منتجات أولاً.");
-                return;
-            }
-            
-            // تحديث تاريخ الفاتورة
-            const now = new Date();
-            invoiceDate.textContent = now.toLocaleDateString('ar-EG', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
             });
-            
-            // تحديث رقم الفاتورة
-            const invoiceNumber = invoiceCounter.toString().padStart(3, '0');
-            invoiceNum.textContent = invoiceNumber;
-            
-            // ملء جدول الفاتورة
-            invoiceItems.innerHTML = '';
-            let total = 0;
-            
-            scannedItems.forEach((item, index) => {
-                const itemTotal = item.price * item.quantity;
-                total += itemTotal;
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${item.name}</td>
-                    <td>${item.price} جنيه</td>
-                    <td>${item.quantity}</td>
-                    <td>${itemTotal} جنيه</td>
-                `;
-                invoiceItems.appendChild(row);
-            });
-            
-            invoiceTotal.textContent = `${total} جنيه`;
-            
-            // إنشاء QR code للفاتورة
-            createInvoiceQRCode(invoiceNumber, total, now);
-            
-            // عرض معاينة الفاتورة
-            invoicePreview.style.display = 'block';
-            invoicePreview.scrollIntoView({ behavior: 'smooth' });
-            
-            // زيادة عداد الفواتير
-            invoiceCounter++;
-        });
 
-        // إنشاء QR code للفاتورة
-        function createInvoiceQRCode(invoiceNumber, total, date) {
-            // مسح أي QR code سابق
-            invoiceQrCode.innerHTML = '';
-            
-            // إنشاء بيانات الفاتورة لـ QR code
-            const invoiceData = {
-                invoiceNumber: invoiceNumber,
-                date: date.toLocaleDateString('ar-EG'),
-                total: total,
-                items: scannedItems.map(item => ({
-                    name: item.name,
-                    price: item.price,
-                    quantity: item.quantity
-                }))
-            };
-            
-            const qrData = JSON.stringify(invoiceData);
-            
-            // إنشاء QR code جديد
-            QRCode.toCanvas(invoiceQrCode, qrData, {
-                width: 180,
-                margin: 1,
-                color: {
-                    dark: '#1a5f7a',
-                    light: '#ffffff'
+            // إيقاف المسح
+            stopScannerBtn.addEventListener('click', () => {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    scanner.srcObject = null;
+                    
+                    // تمكين/تعطيل الأزرار
+                    startScannerBtn.disabled = false;
+                    stopScannerBtn.disabled = true;
                 }
-            }, function (error) {
-                if (error) {
-                    console.error(error);
-                    alert("حدث خطأ أثناء إنشاء QR code للفاتورة");
+            });
+
+            // مسح QR
+            function scanQRCode() {
+                if (!scanner.videoWidth || !scanner.videoHeight) {
+                    requestAnimationFrame(scanQRCode);
                     return;
                 }
                 
-                console.log("QR code للفاتورة تم إنشاؤه بنجاح");
-            });
-        }
-
-        // تعديل الفاتورة
-        editInvoiceBtn.addEventListener('click', () => {
-            invoicePreview.style.display = 'none';
-        });
-
-        // طباعة الفاتورة
-        printInvoiceBtn.addEventListener('click', () => {
-            window.print();
-        });
-
-        // حفظ الفاتورة
-        saveInvoiceBtn.addEventListener('click', () => {
-            // في تطبيق حقيقي، هنا سيتم إرسال الفاتورة إلى الخادم
-            // لكن في هذا المثال، سنقوم فقط بتنزيلها كملف PDF افتراضي
-            
-            alert("تم حفظ الفاتورة بنجاح! (في التطبيق الحقيقي، سيتم حفظها في قاعدة البيانات)");
-        });
-
-        // تحميل QR code الفاتورة
-        downloadInvoiceQrBtn.addEventListener('click', () => {
-            const canvas = invoiceQrCode.querySelector('canvas');
-            if (canvas) {
-                const link = document.createElement('a');
-                link.download = `فاتورة_${invoiceNum.textContent}_QR.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            } else {
-                alert("لم يتم إنشاء QR code للفاتورة بعد");
-            }
-        });
-
-        // إضافة منتج يدويًا
-        addManuallyBtn.addEventListener('click', () => {
-            const name = productNameInput.value.trim();
-            const price = parseFloat(productPriceInput.value);
-            const quantity = parseInt(productQuantityInput.value) || 1;
-            
-            if (!name || isNaN(price) || price <= 0) {
-                alert("يرجى إدخال اسم المنتج وسعر صحيحين");
-                return;
-            }
-            
-            addProductToCart({ name, price }, quantity);
-            
-            // إعادة تعيين الحقول
-            productNameInput.value = '';
-            productPriceInput.value = '';
-            productQuantityInput.value = '1';
-        });
-
-        // السماح بإدخال المنتج يدويًا باستخدام Enter
-        productNameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                addManuallyBtn.click();
-            }
-        });
-        
-        productPriceInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                addManuallyBtn.click();
-            }
-        });
-
-        // إرفاق صورة QR من الموبايل
-        uploadQrInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
+                canvasElement.width = scanner.videoWidth;
+                canvasElement.height = scanner.videoHeight;
+                canvasContext.drawImage(scanner, 0, 0, canvasElement.width, canvasElement.height);
                 
-                reader.onload = function(event) {
-                    uploadedImage.src = event.target.result;
-                    uploadPreview.style.display = 'block';
-                    currentUploadedImage = event.target.result;
-                    scanUploadedQrBtn.disabled = false;
-                };
-                
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // مسح QR من الصورة المرفوعة
-        scanUploadedQrBtn.addEventListener('click', () => {
-            if (!currentUploadedImage) {
-                alert("يرجى رفع صورة QR أولاً");
-                return;
-            }
-            
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0, img.width, img.height);
-                
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
                 const code = jsQR(imageData.data, imageData.width, imageData.height);
                 
                 if (code) {
+                    // وجدنا رمز QR
                     const productCode = code.data;
                     
-                    if (productsDatabase[productCode]) {
-                        addProductToCart(productsDatabase[productCode]);
-                        alert(`تم إضافة المنتج: ${productsDatabase[productCode].name}`);
+                    // محاولة تحليل JSON إذا كان الرمز يحتوي على بيانات JSON
+                    let productId = productCode;
+                    try {
+                        const parsedData = JSON.parse(productCode);
+                        if (parsedData.id) {
+                            productId = parsedData.id;
+                        }
+                    } catch (e) {
+                        // ليس JSON، نستخدم الرمز كما هو
+                    }
+                    
+                    if (productsDatabase[productId]) {
+                        addProductToCart(productsDatabase[productId]);
                     } else {
                         alert("رمز QR غير معروف. المنتج غير موجود في قاعدة البيانات.");
                     }
-                } else {
-                    alert("لم يتم العثور على رمز QR في الصورة. يرجى التأكد من جودة الصورة.");
                 }
-            };
-            
-            img.src = currentUploadedImage;
-        });
-
-        // إنشاء رمز QR جديد
-        qrGeneratorForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('new-product-name').value.trim();
-            const price = parseFloat(document.getElementById('new-product-price').value);
-            const category = document.getElementById('new-product-category').value;
-            const description = document.getElementById('new-product-description').value.trim();
-            
-            if (!name || isNaN(price) || price <= 0) {
-                alert("يرجى إدخال اسم المنتج وسعر صحيحين");
-                return;
+                
+                requestAnimationFrame(scanQRCode);
             }
-            
-            // إنشاء معرف فريد للمنتج
-            const productId = nextProductId.toString().padStart(3, '0');
-            nextProductId++;
-            
-            // إضافة المنتج إلى قاعدة البيانات
-            productsDatabase[productId] = {
-                name,
-                price,
-                category,
-                description
-            };
-            
-            // إنشاء رمز QR
-            const qrData = JSON.stringify({
-                id: productId,
-                name,
-                price,
-                category
-            });
-            
-            // مسح أي رمز QR سابق
-            document.getElementById('qrcode').innerHTML = '';
-            
-            // إنشاء رمز QR جديد
-            QRCode.toCanvas(document.getElementById('qrcode'), qrData, {
-                width: 200,
-                margin: 2,
-                color: {
-                    dark: '#1a5f7a',
-                    light: '#ffffff'
+
+            // إضافة منتج إلى السلة
+            function addProductToCart(product, quantity = 1) {
+                // التحقق مما إذا كان المنتج موجودًا بالفعل
+                const existingItemIndex = scannedItems.findIndex(item => item.name === product.name);
+                
+                if (existingItemIndex !== -1) {
+                    // زيادة الكمية إذا كان المنتج موجودًا
+                    scannedItems[existingItemIndex].quantity += quantity;
+                } else {
+                    // إضافة منتج جديد
+                    scannedItems.push({
+                        id: Date.now(),
+                        name: product.name,
+                        price: product.price,
+                        quantity: quantity
+                    });
                 }
-            }, function (error) {
-                if (error) {
-                    console.error(error);
-                    alert("حدث خطأ أثناء إنشاء رمز QR");
+                
+                updateItemsList();
+                
+                // تأثير إضافة المنتج
+                const itemList = document.getElementById('items-container');
+                itemList.classList.add('animation-fade-in');
+                setTimeout(() => {
+                    itemList.classList.remove('animation-fade-in');
+                }, 500);
+            }
+
+            // تحديث قائمة المنتجات
+            function updateItemsList() {
+                itemsContainer.innerHTML = '';
+                
+                if (scannedItems.length === 0) {
+                    itemsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-basket"></i>
+                            <h5>لا توجد منتجات</h5>
+                            <p class="mb-0">ابدأ بمسح رموز QR أو إضافة المنتجات يدويًا</p>
+                        </div>
+                    `;
+                } else {
+                    scannedItems.forEach((item, index) => {
+                        const itemElement = document.createElement('div');
+                        itemElement.className = 'item-row d-flex justify-content-between align-items-center';
+                        itemElement.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-primary rounded-pill me-2">${index + 1}</span>
+                                <div>
+                                    <div class="fw-bold">${item.name}</div>
+                                    <div class="small text-muted">${item.price} جنيه × ${item.quantity}</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="fw-bold me-3">${item.price * item.quantity} جنيه</span>
+                                <button class="btn btn-sm btn-outline-danger delete-item" data-id="${item.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        itemsContainer.appendChild(itemElement);
+                    });
+                    
+                    // إضافة مستمعات الأحداث لأزرار الحذف
+                    document.querySelectorAll('.delete-item').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const itemId = parseInt(e.target.closest('.delete-item').dataset.id);
+                            removeItemFromCart(itemId);
+                        });
+                    });
+                }
+                
+                itemsCount.textContent = scannedItems.length;
+            }
+
+            // إزالة منتج من السلة
+            function removeItemFromCart(itemId) {
+                scannedItems = scannedItems.filter(item => item.id !== itemId);
+                updateItemsList();
+            }
+
+            // مسح جميع المنتجات
+            clearAllBtn.addEventListener('click', () => {
+                if (scannedItems.length > 0) {
+                    if (confirm("هل أنت متأكد من مسح جميع المنتجات؟")) {
+                        scannedItems = [];
+                        updateItemsList();
+                    }
+                }
+            });
+
+            // إنشاء الفاتورة - تم إصلاح المشكلة هنا
+            generateInvoiceBtn.addEventListener('click', function() {
+                console.log("تم النقر على زر إنشاء الفاتورة");
+                
+                if (scannedItems.length === 0) {
+                    alert("لا توجد منتجات لإضافة الفاتورة. يرجى إضافة منتجات أولاً.");
                     return;
                 }
                 
-                // عرض معاينة رمز QR
-                qrProductName.textContent = name;
-                qrProductPrice.textContent = price;
-                qrProductCategory.textContent = category;
+                // تحديث تاريخ الفاتورة
+                const now = new Date();
+                invoiceDate.textContent = now.toLocaleDateString('ar-EG', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
                 
-                qrEmptyState.style.display = 'none';
-                qrPreview.style.display = 'block';
+                // تحديث رقم الفاتورة
+                const invoiceNumber = invoiceCounter.toString().padStart(3, '0');
+                invoiceNum.textContent = invoiceNumber;
                 
-                // تحديث قائمة المنتجات
-                updateProductsList();
+                // ملء جدول الفاتورة
+                invoiceItems.innerHTML = '';
+                let total = 0;
+                
+                scannedItems.forEach((item, index) => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.price} جنيه</td>
+                        <td>${item.quantity}</td>
+                        <td>${itemTotal} جنيه</td>
+                    `;
+                    invoiceItems.appendChild(row);
+                });
+                
+                invoiceTotal.textContent = `${total} جنيه`;
+                
+                // عرض معلومات العميل في الفاتورة إذا كانت موجودة
+                const customerName = customerNameInput.value.trim();
+                const customerPhone = customerPhoneInput.value.trim();
+                
+                if (customerName || customerPhone) {
+                    invoiceCustomerInfo.style.display = 'block';
+                    invoiceCustomerName.textContent = customerName || 'غير محدد';
+                    invoiceCustomerPhone.textContent = customerPhone || 'غير محدد';
+                } else {
+                    invoiceCustomerInfo.style.display = 'none';
+                }
+                
+                // إنشاء QR code للفاتورة
+                createInvoiceQRCode(invoiceNumber, total, now, customerName, customerPhone);
+                
+                // عرض معاينة الفاتورة
+                invoicePreview.style.display = 'block';
+                invoicePreview.scrollIntoView({ behavior: 'smooth' });
+                
+                // زيادة عداد الفواتير
+                invoiceCounter++;
+                
+                console.log("تم إنشاء الفاتورة بنجاح");
+            });
+
+            // إنشاء QR code للفاتورة
+            function createInvoiceQRCode(invoiceNumber, total, date, customerName, customerPhone) {
+                // مسح أي QR code سابق
+                invoiceQrCode.innerHTML = '';
+                
+                // إنشاء بيانات الفاتورة لـ QR code
+                const invoiceData = {
+                    invoiceNumber: invoiceNumber,
+                    date: date.toLocaleDateString('ar-EG'),
+                    total: total,
+                    customerName: customerName,
+                    customerPhone: customerPhone,
+                    items: scannedItems.map(item => ({
+                        name: item.name,
+                        price: item.price,
+                        quantity: item.quantity
+                    }))
+                };
+                
+                const qrData = JSON.stringify(invoiceData);
+                
+                // استخدام مكتبة QRCode مباشرة
+                try {
+                    QRCode.toCanvas(invoiceQrCode, qrData, {
+                        width: 180,
+                        margin: 1,
+                        color: {
+                            dark: '#1a5f7a',
+                            light: '#ffffff'
+                        }
+                    }, function (error) {
+                        if (error) {
+                            console.error(error);
+                            // إذا فشل إنشاء QR code، نعرض رسالة بديلة
+                            invoiceQrCode.innerHTML = '<p class="text-danger">تعذر إنشاء QR code</p>';
+                        } else {
+                            console.log("QR code للفاتورة تم إنشاؤه بنجاح");
+                        }
+                    });
+                } catch (error) {
+                    console.error("خطأ في إنشاء QR code:", error);
+                    invoiceQrCode.innerHTML = '<p class="text-danger">تعذر إنشاء QR code</p>';
+                }
+            }
+
+            // تعديل الفاتورة
+            editInvoiceBtn.addEventListener('click', () => {
+                invoicePreview.style.display = 'none';
+            });
+
+            // طباعة الفاتورة
+            printInvoiceBtn.addEventListener('click', () => {
+                window.print();
+            });
+
+            // حفظ الفاتورة
+            saveInvoiceBtn.addEventListener('click', () => {
+                const invoiceData = {
+                    invoiceNumber: invoiceNum.textContent,
+                    date: invoiceDate.textContent,
+                    total: invoiceTotal.textContent,
+                    items: scannedItems,
+                    customerName: customerNameInput.value.trim(),
+                    customerPhone: customerPhoneInput.value.trim()
+                };
+                
+                // حفظ البيانات في localStorage
+                const savedInvoices = JSON.parse(localStorage.getItem('savedInvoices') || '[]');
+                savedInvoices.push(invoiceData);
+                localStorage.setItem('savedInvoices', JSON.stringify(savedInvoices));
+                
+                alert("تم حفظ الفاتورة بنجاح في قاعدة البيانات المحلية!");
+            });
+
+            // إرسال الفاتورة
+            sendInvoiceBtn.addEventListener('click', () => {
+                const customerPhone = customerPhoneInput.value.trim();
+                
+                if (!customerPhone) {
+                    alert("يرجى إدخال رقم هاتف العميل لإرسال الفاتورة");
+                    return;
+                }
+                
+                // محاكاة إرسال الفاتورة عبر واتساب
+                const invoiceText = `فاتورة مول السعودية\nرقم الفاتورة: ${invoiceNum.textContent}\nالإجمالي: ${invoiceTotal.textContent}\nشكرًا لشرائك من مول السعودية!`;
+                
+                // إنشاء رابط واتساب
+                const whatsappUrl = `https://wa.me/${customerPhone}?text=${encodeURIComponent(invoiceText)}`;
+                
+                // فتح نافذة جديدة لإرسال الفاتورة
+                window.open(whatsappUrl, '_blank');
+                
+                alert("جارٍ فتح واتساب لإرسال الفاتورة للعميل...");
+            });
+
+            // تحميل QR code الفاتورة
+            downloadInvoiceQrBtn.addEventListener('click', () => {
+                const canvas = invoiceQrCode.querySelector('canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.download = `فاتورة_${invoiceNum.textContent}_QR.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } else {
+                    alert("لم يتم إنشاء QR code للفاتورة بعد");
+                }
+            });
+
+            // إضافة منتج يدويًا
+            addManuallyBtn.addEventListener('click', () => {
+                const name = productNameInput.value.trim();
+                const price = parseFloat(productPriceInput.value);
+                const quantity = parseInt(productQuantityInput.value) || 1;
+                
+                if (!name || isNaN(price) || price <= 0) {
+                    alert("يرجى إدخال اسم المنتج وسعر صحيحين");
+                    return;
+                }
+                
+                addProductToCart({ name, price }, quantity);
+                
+                // إعادة تعيين الحقول
+                productNameInput.value = '';
+                productPriceInput.value = '';
+                productQuantityInput.value = '1';
+            });
+
+            // السماح بإدخال المنتج يدويًا باستخدام Enter
+            productNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addManuallyBtn.click();
+                }
             });
             
-            // إعادة تعيين النموذج
-            qrGeneratorForm.reset();
-        });
+            productPriceInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addManuallyBtn.click();
+                }
+            });
 
-        // تحميل رمز QR
-        downloadQrBtn.addEventListener('click', () => {
-            const canvas = document.getElementById('qrcode');
-            if (canvas) {
-                const link = document.createElement('a');
-                link.download = `qrcode_${qrProductName.textContent}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            }
-        });
+            // إرفاق صورة QR من الموبايل
+            uploadQrInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        uploadedImage.src = event.target.result;
+                        uploadPreview.style.display = 'block';
+                        currentUploadedImage = event.target.result;
+                        scanUploadedQrBtn.disabled = false;
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
 
-        // تحديث قائمة المنتجات
-        function updateProductsList() {
-            productsContainer.innerHTML = '';
-            
-            const productKeys = Object.keys(productsDatabase);
-            
-            if (productKeys.length === 0) {
-                productsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-box-open"></i>
-                        <h5>لا توجد منتجات</h5>
-                        <p class="mb-0">انتقل إلى علامة تبويب "إنشاء QR" لإضافة منتجات جديدة</p>
-                    </div>
-                `;
-            } else {
-                productKeys.forEach(key => {
-                    const product = productsDatabase[key];
-                    const productElement = document.createElement('div');
-                    productElement.className = 'product-item d-flex justify-content-between align-items-center';
-                    productElement.innerHTML = `
-                        <div>
-                            <div class="fw-bold">${product.name}</div>
-                            <div class="small text-muted">
-                                السعر: ${product.price} جنيه | 
-                                الفئة: ${product.category} |
-                                الرمز: ${key}
-                            </div>
-                            ${product.description ? `<div class="small mt-1">${product.description}</div>` : ''}
-                        </div>
-                        <div>
-                            <button class="btn btn-sm btn-outline-primary view-product" data-id="${key}">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger delete-product" data-id="${key}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    productsContainer.appendChild(productElement);
-                });
+            // مسح QR من الصورة المرفوعة
+            scanUploadedQrBtn.addEventListener('click', () => {
+                if (!currentUploadedImage) {
+                    alert("يرجى رفع صورة QR أولاً");
+                    return;
+                }
                 
-                // إضافة مستمعات الأحداث لأزرار المنتجات
-                document.querySelectorAll('.view-product').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const productId = e.target.closest('.view-product').dataset.id;
-                        viewProduct(productId);
-                    });
-                });
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    
+                    if (code) {
+                        const productCode = code.data;
+                        
+                        // محاولة تحليل JSON إذا كان الرمز يحتوي على بيانات JSON
+                        let productId = productCode;
+                        try {
+                            const parsedData = JSON.parse(productCode);
+                            if (parsedData.id) {
+                                productId = parsedData.id;
+                            }
+                        } catch (e) {
+                            // ليس JSON، نستخدم الرمز كما هو
+                        }
+                        
+                        if (productsDatabase[productId]) {
+                            addProductToCart(productsDatabase[productId]);
+                            alert(`تم إضافة المنتج: ${productsDatabase[productId].name}`);
+                        } else {
+                            alert("رمز QR غير معروف. المنتج غير موجود في قاعدة البيانات.");
+                        }
+                    } else {
+                        alert("لم يتم العثور على رمز QR في الصورة. يرجى التأكد من جودة الصورة.");
+                    }
+                };
                 
-                document.querySelectorAll('.delete-product').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const productId = e.target.closest('.delete-product').dataset.id;
-                        deleteProduct(productId);
-                    });
-                });
-            }
-            
-            productsCount.textContent = productKeys.length;
-        }
+                img.src = currentUploadedImage;
+            });
 
-        // عرض منتج
-        function viewProduct(productId) {
-            const product = productsDatabase[productId];
-            if (product) {
-                // إنشاء رمز QR للمنتج
+            // إنشاء رمز QR جديد
+            qrGeneratorForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const name = document.getElementById('new-product-name').value.trim();
+                const price = parseFloat(document.getElementById('new-product-price').value);
+                const category = document.getElementById('new-product-category').value;
+                const description = document.getElementById('new-product-description').value.trim();
+                
+                if (!name || isNaN(price) || price <= 0) {
+                    alert("يرجى إدخال اسم المنتج وسعر صحيحين");
+                    return;
+                }
+                
+                // إنشاء معرف فريد للمنتج
+                const productId = nextProductId.toString().padStart(3, '0');
+                nextProductId++;
+                
+                // إضافة المنتج إلى قاعدة البيانات
+                productsDatabase[productId] = {
+                    name,
+                    price,
+                    category,
+                    description
+                };
+                
+                // إنشاء رمز QR
                 const qrData = JSON.stringify({
                     id: productId,
-                    name: product.name,
-                    price: product.price,
-                    category: product.category
+                    name,
+                    price,
+                    category
                 });
                 
                 // مسح أي رمز QR سابق
@@ -1290,30 +1400,199 @@
                     }
                     
                     // عرض معاينة رمز QR
-                    qrProductName.textContent = product.name;
-                    qrProductPrice.textContent = product.price;
-                    qrProductCategory.textContent = product.category;
+                    qrProductName.textContent = name;
+                    qrProductPrice.textContent = price;
+                    qrProductCategory.textContent = category;
                     
                     qrEmptyState.style.display = 'none';
                     qrPreview.style.display = 'block';
                     
-                    // الانتقال إلى علامة تبويب إنشاء QR
-                    document.getElementById('generator-tab').click();
+                    // تحديث قائمة المنتجات
+                    updateProductsList();
                 });
-            }
-        }
+                
+                // إعادة تعيين النموذج
+                qrGeneratorForm.reset();
+            });
 
-        // حذف منتج
-        function deleteProduct(productId) {
-            if (confirm(`هل أنت متأكد من حذف المنتج "${productsDatabase[productId].name}"؟`)) {
-                delete productsDatabase[productId];
+            // تحميل رمز QR
+            downloadQrBtn.addEventListener('click', () => {
+                const canvas = document.getElementById('qrcode');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.download = `qrcode_${qrProductName.textContent}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }
+            });
+
+            // تحديث قائمة المنتجات
+            function updateProductsList() {
+                productsContainer.innerHTML = '';
+                
+                const productKeys = Object.keys(productsDatabase);
+                
+                if (productKeys.length === 0) {
+                    productsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <h5>لا توجد منتجات</h5>
+                            <p class="mb-0">استخدم النموذج أعلاه لإضافة منتجات جديدة</p>
+                        </div>
+                    `;
+                } else {
+                    productKeys.forEach(key => {
+                        const product = productsDatabase[key];
+                        const productElement = document.createElement('div');
+                        productElement.className = 'product-item d-flex justify-content-between align-items-center';
+                        productElement.innerHTML = `
+                            <div>
+                                <div class="fw-bold">${product.name}</div>
+                                <div class="small text-muted">
+                                    السعر: ${product.price} جنيه | 
+                                    الفئة: ${product.category} |
+                                    الرمز: ${key}
+                                </div>
+                                ${product.description ? `<div class="small mt-1">${product.description}</div>` : ''}
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary edit-product" data-id="${key}">
+                                    <i class="fas fa-edit"></i> تعديل
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger delete-product" data-id="${key}">
+                                    <i class="fas fa-trash"></i> حذف
+                                </button>
+                            </div>
+                        `;
+                        productsContainer.appendChild(productElement);
+                    });
+                    
+                    // إضافة مستمعات الأحداث لأزرار المنتجات
+                    document.querySelectorAll('.edit-product').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const productId = e.target.closest('.edit-product').dataset.id;
+                            openEditProductForm(productId);
+                        });
+                    });
+                    
+                    document.querySelectorAll('.delete-product').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const productId = e.target.closest('.delete-product').dataset.id;
+                            deleteProduct(productId);
+                        });
+                    });
+                }
+                
+                productsCount.textContent = productKeys.length;
+            }
+
+            // فتح نموذج تعديل المنتج
+            function openEditProductForm(productId) {
+                const product = productsDatabase[productId];
+                if (product) {
+                    currentlyEditingProductId = productId;
+                    editProductIdInput.value = productId;
+                    editProductNameInput.value = product.name;
+                    editProductPriceInput.value = product.price;
+                    editProductCategoryInput.value = product.category;
+                    editProductForm.style.display = 'block';
+                    editProductForm.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+
+            // إغلاق نموذج تعديل المنتج
+            cancelEditBtn.addEventListener('click', () => {
+                editProductForm.style.display = 'none';
+                currentlyEditingProductId = null;
+            });
+
+            // تحديث المنتج
+            updateProductBtn.addEventListener('click', () => {
+                if (!currentlyEditingProductId) {
+                    alert("لم يتم تحديد منتج للتعديل");
+                    return;
+                }
+                
+                const name = editProductNameInput.value.trim();
+                const price = parseFloat(editProductPriceInput.value);
+                const category = editProductCategoryInput.value;
+                
+                if (!name || isNaN(price) || price <= 0) {
+                    alert("يرجى إدخال اسم المنتج وسعر صحيحين");
+                    return;
+                }
+                
+                // تحديث المنتج في قاعدة البيانات
+                productsDatabase[currentlyEditingProductId] = {
+                    ...productsDatabase[currentlyEditingProductId],
+                    name,
+                    price,
+                    category
+                };
+                
+                // تحديث قائمة المنتجات
                 updateProductsList();
-            }
-        }
+                
+                // إغلاق نموذج التعديل
+                editProductForm.style.display = 'none';
+                currentlyEditingProductId = null;
+                
+                alert("تم تحديث المنتج بنجاح!");
+            });
 
-        // تهيئة التطبيق
-        updateItemsList();
-        updateProductsList();
+            // إضافة منتج جديد من إدارة المنتجات
+            addProductManagementBtn.addEventListener('click', () => {
+                const productId = newProductIdInput.value.trim();
+                const name = newProductNameManagementInput.value.trim();
+                const price = parseFloat(newProductPriceManagementInput.value);
+                const category = newProductCategoryManagementInput.value;
+                
+                if (!productId || !name || isNaN(price) || price <= 0) {
+                    alert("يرجى إدخال جميع البيانات بشكل صحيح (كود المنتج، الاسم، والسعر)");
+                    return;
+                }
+                
+                // التحقق من عدم وجود كود مكرر
+                if (productsDatabase[productId]) {
+                    alert("كود المنتج موجود مسبقًا. يرجى استخدام كود مختلف.");
+                    return;
+                }
+                
+                // إضافة المنتج إلى قاعدة البيانات
+                productsDatabase[productId] = {
+                    name,
+                    price,
+                    category,
+                    description: ""
+                };
+                
+                // تحديث قائمة المنتجات
+                updateProductsList();
+                
+                // إعادة تعيين الحقول
+                newProductIdInput.value = '';
+                newProductNameManagementInput.value = '';
+                newProductPriceManagementInput.value = '';
+                newProductCategoryManagementInput.value = 'أثاث';
+                
+                alert("تم إضافة المنتج بنجاح!");
+            });
+
+            // حذف منتج
+            function deleteProduct(productId) {
+                if (confirm(`هل أنت متأكد من حذف المنتج "${productsDatabase[productId].name}"؟`)) {
+                    delete productsDatabase[productId];
+                    updateProductsList();
+                    alert("تم حذف المنتج بنجاح!");
+                }
+            }
+
+            // تهيئة التطبيق
+            updateItemsList();
+            updateProductsList();
+            
+            console.log("تم تحميل النظام بنجاح");
+        });
     </script>
 </body>
 </html>
