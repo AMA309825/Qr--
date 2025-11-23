@@ -1231,7 +1231,7 @@
                 const invoiceText = `فاتورة مول السعودية\nرقم الفاتورة: ${invoiceNum.textContent}\nالإجمالي: ${invoiceTotal.textContent}\nشكرًا لشرائك من مول السعودية!`;
                 
                 // إنشاء رابط واتساب
-                const whatsappUrl = `https://wa.me/${01101362148}?text=${encodeURIComponent(invoiceText)}`;
+                const whatsappUrl = `https://wa.me/${customerPhone}?text=${encodeURIComponent(invoiceText)}`;
                 
                 // فتح نافذة جديدة لإرسال الفاتورة
                 window.open(whatsappUrl, '_blank');
